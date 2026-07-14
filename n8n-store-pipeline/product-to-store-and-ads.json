@@ -1,0 +1,353 @@
+{
+  "name": "Product → Store + Ad Creative (semi-automated)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Products"
+        },
+        "options": {}
+      },
+      "id": "trigger-sheet",
+      "name": "New Product Row (Google Sheets)",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        320
+      ],
+      "notes": "Watches a Google Sheet. You paste a supplier product URL into column 'source_url' and this fires. Columns expected: source_url, status."
+    },
+    {
+      "parameters": {
+        "url": "=https://api.scraperapi.com/?api_key=YOUR_SCRAPERAPI_KEY&render=true&country_code=us&url={{ encodeURIComponent($json.source_url) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "fetch-page",
+      "name": "Fetch Product Page (HTML)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -420,
+        320
+      ],
+      "notes": "Fetches the supplier page THROUGH ScraperAPI (render=true runs JS, rotates IPs, solves most blocks). Get a free key at scraperapi.com (1000 free calls/mo) and paste it over YOUR_SCRAPERAPI_KEY. To skip ScraperAPI and hit the site directly, set the URL to just: ={{ $json.source_url }}"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $credentials.anthropicApiKey || 'SET_IN_ENV' }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 1500,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are a product-data extractor. From the raw HTML below, extract a JSON object with EXACTLY these keys: title, supplier_price (number, USD), key_features (array of short strings), image_urls (array of up to 5 direct image URLs), category. If a field is missing use null. Return ONLY the JSON, no prose.\\n\\nHTML:\\n{{ $json.data.slice(0, 30000) }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "ai-extract",
+      "name": "AI: Extract Product Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -200,
+        320
+      ],
+      "notes": "Sends the HTML to Claude to pull structured product data. Set your Anthropic API key in the header."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the JSON Claude returned and compute pricing/margin.\nconst raw = $json.content?.[0]?.text || '{}';\nlet product;\ntry {\n  const match = raw.match(/\\{[\\s\\S]*\\}/);\n  product = JSON.parse(match ? match[0] : raw);\n} catch (e) {\n  throw new Error('Could not parse AI product JSON: ' + raw);\n}\n\n// --- Your pricing rule: markup + floor ---\nconst supplier = Number(product.supplier_price) || 0;\nconst MARKUP = 3.0;        // sell at 3x supplier cost\nconst MIN_MARGIN = 12;     // never sell for less than $12 over cost\nlet price = Math.max(supplier * MARKUP, supplier + MIN_MARGIN);\nprice = Math.max(price, 9.99);\nprice = Math.round(price) - 0.01; // charm pricing e.g. 29.99\n\nreturn [{ json: { ...product, supplier_price: supplier, sell_price: price } }];"
+      },
+      "id": "compute-pricing",
+      "name": "Compute Price + Margin",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $credentials.anthropicApiKey || 'SET_IN_ENV' }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 1200,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Write ecommerce copy for this product. Return ONLY JSON with keys: store_title (max 60 chars, benefit-driven), store_description_html (2-3 short paragraphs + a <ul> of features, valid HTML), seo_title, seo_description (max 155 chars), ad_hook (a scroll-stopping one-liner), ad_primary_text (2-3 punchy sentences for a Facebook ad), tiktok_caption (short, with 3-5 hashtags). Product: {{ JSON.stringify($json) }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "ai-copy",
+      "name": "AI: Write Listing + Ad Copy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content?.[0]?.text || '{}';\nlet copy;\ntry {\n  const match = raw.match(/\\{[\\s\\S]*\\}/);\n  copy = JSON.parse(match ? match[0] : raw);\n} catch (e) {\n  throw new Error('Could not parse AI copy JSON: ' + raw);\n}\n// carry the product data forward too\nconst product = $('Compute Price + Margin').item.json;\nreturn [{ json: { ...product, ...copy } }];"
+      },
+      "id": "merge-copy",
+      "name": "Merge Copy + Product",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "product",
+        "operation": "create",
+        "title": "={{ $json.store_title }}",
+        "additionalFields": {
+          "body_html": "={{ $json.store_description_html }}",
+          "product_type": "={{ $json.category }}",
+          "published": false,
+          "variants": {
+            "variant": [
+              {
+                "price": "={{ $json.sell_price }}",
+                "inventory_quantity": 100
+              }
+            ]
+          }
+        }
+      },
+      "id": "shopify-create",
+      "name": "Create Product in Shopify (DRAFT)",
+      "type": "n8n-nodes-base.shopify",
+      "typeVersion": 1,
+      "position": [
+        700,
+        200
+      ],
+      "notes": "Creates the product as a DRAFT (published:false) so you review before it goes live. Flip published:true once you trust the line. Images are attached in the next step."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build one item per image URL so we can attach them to the Shopify product.\nconst product = $('Merge Copy + Product').item.json;\nconst productId = $json.id;\nconst urls = (product.image_urls || []).filter(Boolean).slice(0, 5);\nreturn urls.map(u => ({ json: { product_id: productId, src: u } }));"
+      },
+      "id": "explode-images",
+      "name": "Split Image URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "productImage",
+        "operation": "create",
+        "productId": "={{ $json.product_id }}",
+        "additionalFields": {
+          "src": "={{ $json.src }}"
+        }
+      },
+      "id": "shopify-image",
+      "name": "Attach Image to Product",
+      "type": "n8n-nodes-base.shopify",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        200
+      ],
+      "notes": "Uploads each product image. If your Shopify node version lacks productImage, use an HTTP node POSTing to /admin/api/2024-01/products/{id}/images.json"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Ad Queue"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "product_title": "={{ $('Merge Copy + Product').item.json.store_title }}",
+            "sell_price": "={{ $('Merge Copy + Product').item.json.sell_price }}",
+            "supplier_price": "={{ $('Merge Copy + Product').item.json.supplier_price }}",
+            "ad_hook": "={{ $('Merge Copy + Product').item.json.ad_hook }}",
+            "fb_primary_text": "={{ $('Merge Copy + Product').item.json.ad_primary_text }}",
+            "tiktok_caption": "={{ $('Merge Copy + Product').item.json.tiktok_caption }}",
+            "main_image": "={{ ($('Merge Copy + Product').item.json.image_urls || [])[0] }}",
+            "status": "READY TO LAUNCH"
+          }
+        },
+        "options": {}
+      },
+      "id": "ad-queue",
+      "name": "Save Ad Creative to Queue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        700,
+        440
+      ],
+      "notes": "Everything you need to launch an ad lands in one row: hook, FB copy, TikTok caption, image. You review and hit launch manually (the gated step)."
+    }
+  ],
+  "connections": {
+    "New Product Row (Google Sheets)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Product Page (HTML)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Product Page (HTML)": {
+      "main": [
+        [
+          {
+            "node": "AI: Extract Product Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Extract Product Data": {
+      "main": [
+        [
+          {
+            "node": "Compute Price + Margin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Price + Margin": {
+      "main": [
+        [
+          {
+            "node": "AI: Write Listing + Ad Copy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Write Listing + Ad Copy": {
+      "main": [
+        [
+          {
+            "node": "Merge Copy + Product",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Copy + Product": {
+      "main": [
+        [
+          {
+            "node": "Create Product in Shopify (DRAFT)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Ad Creative to Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Product in Shopify (DRAFT)": {
+      "main": [
+        [
+          {
+            "node": "Split Image URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Image URLs": {
+      "main": [
+        [
+          {
+            "node": "Attach Image to Product",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
