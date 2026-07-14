@@ -34,13 +34,14 @@
     },
     {
       "parameters": {
-        "url": "={{ $json.source_url }}",
+        "url": "=https://api.scraperapi.com/?api_key=YOUR_SCRAPERAPI_KEY&render=true&country_code=us&url={{ encodeURIComponent($json.source_url) }}",
         "options": {
           "response": {
             "response": {
               "responseFormat": "text"
             }
-          }
+          },
+          "timeout": 60000
         }
       },
       "id": "fetch-page",
@@ -51,7 +52,7 @@
         -420,
         320
       ],
-      "notes": "Grabs the raw HTML of the supplier product page. NOTE: big sites (AliExpress etc.) may block this or need a proxy/scraping API. Swap this node for a scraping service (ScraperAPI, Apify) if you get blocked."
+      "notes": "Fetches the supplier page THROUGH ScraperAPI (render=true runs JS, rotates IPs, solves most blocks). Get a free key at scraperapi.com (1000 free calls/mo) and paste it over YOUR_SCRAPERAPI_KEY. To skip ScraperAPI and hit the site directly, set the URL to just: ={{ $json.source_url }}"
     },
     {
       "parameters": {
