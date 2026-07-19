@@ -1,0 +1,178 @@
+<meta charset="utf-8">
+<title>Aprende — Learn Spanish</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#B3122E">
+<style>
+  :root{
+    --bg:#0E0B0A; --bg-2:#080605; --panel:#191411; --panel-2:#211913;
+    --line:#3A2C22; --line-soft:#2A201A;
+    --ink:#FBF5EC; --ink-2:#C9B7A4; --ink-3:#8A7561;
+    --red:#E63946; --red-2:#C1121F; --red-deep:#7A0E17;
+    --gold:#F2B705; --gold-2:#D99E04; --gold-deep:#8A6D0B;
+    --green:#4FB477; --green-2:#2E8B57;
+    --blue:#4C86C6;
+    --r:16px; --r-s:11px; --maxw:600px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --serif:"Iowan Old Style",Georgia,"Times New Roman",serif;
+    color-scheme:dark;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  body{
+    background:
+      radial-gradient(130% 55% at 50% -8%, rgba(230,57,70,.14), transparent 55%),
+      radial-gradient(95% 50% at 50% 115%, rgba(242,183,5,.10), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    line-height:1.5; min-height:100dvh;
+  }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 16px calc(96px + env(safe-area-inset-bottom)); }
+  a{ color:inherit; }
+
+  header.top{ display:flex; align-items:center; justify-content:space-between; padding:4px 2px 16px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand b{ font-size:22px; letter-spacing:.5px; font-weight:800; }
+  .brand .flag{ font-size:20px; }
+  .brand small{ color:var(--ink-3); font-size:12px; letter-spacing:2px; text-transform:uppercase; }
+  .streak{ display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line);
+    padding:6px 12px; border-radius:999px; font-weight:700; font-size:14px; }
+  .streak .n{ color:var(--gold); }
+
+  .card{ background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--line);
+    border-radius:var(--r); padding:18px; margin-bottom:14px; }
+  .card h2{ margin:0 0 4px; font-size:15px; letter-spacing:.4px; }
+  .muted{ color:var(--ink-3); }
+  .ink2{ color:var(--ink-2); }
+
+  /* stats row */
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .stat{ background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--line);
+    border-radius:var(--r-s); padding:14px 12px; text-align:center; }
+  .stat .v{ font-size:26px; font-weight:800; line-height:1; }
+  .stat .l{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-3); margin-top:6px; }
+  .stat.gold .v{ color:var(--gold); } .stat.red .v{ color:var(--red); } .stat.green .v{ color:var(--green); }
+
+  /* progress */
+  .bar{ height:9px; border-radius:99px; background:#2a201a; overflow:hidden; margin-top:10px; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--red)); border-radius:99px; transition:width .5s ease; }
+  .goalrow{ display:flex; justify-content:space-between; align-items:baseline; }
+
+  /* lesson list */
+  .lessons{ display:grid; gap:10px; }
+  .lesson{ display:flex; align-items:center; gap:14px; background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line); border-radius:var(--r); padding:14px; cursor:pointer; text-align:left; width:100%;
+    color:inherit; font:inherit; transition:transform .08s ease, border-color .2s; }
+  .lesson:active{ transform:scale(.99); } .lesson:hover{ border-color:var(--gold-deep); }
+  .lesson .emoji{ font-size:26px; width:44px; height:44px; display:grid; place-items:center; background:#0d0a08;
+    border:1px solid var(--line); border-radius:12px; flex:none; }
+  .lesson .grow{ flex:1; min-width:0; }
+  .lesson .t{ font-weight:700; font-size:15px; }
+  .lesson .s{ font-size:12px; color:var(--ink-3); }
+  .lesson .mini{ height:6px; border-radius:99px; background:#2a201a; margin-top:7px; overflow:hidden; }
+  .lesson .mini > i{ display:block; height:100%; background:linear-gradient(90deg,var(--green),var(--gold)); }
+  .lesson .chev{ color:var(--ink-3); font-size:20px; }
+
+  /* buttons */
+  .btn{ appearance:none; border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
+    font:inherit; font-weight:700; padding:13px 16px; border-radius:12px; cursor:pointer; transition:transform .08s, filter .15s; }
+  .btn:active{ transform:scale(.98); }
+  .btn.primary{ background:linear-gradient(180deg,var(--red),var(--red-2)); border-color:var(--red-deep); color:#fff; }
+  .btn.gold{ background:linear-gradient(180deg,var(--gold),var(--gold-2)); border-color:var(--gold-deep); color:#241c05; }
+  .btn.ghost{ background:transparent; }
+  .btn.block{ width:100%; }
+  .btn:disabled{ opacity:.5; cursor:default; }
+  .btnrow{ display:flex; gap:10px; }
+
+  /* section header with back */
+  .shead{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .back{ width:38px; height:38px; border-radius:11px; border:1px solid var(--line); background:var(--panel);
+    display:grid; place-items:center; font-size:18px; cursor:pointer; color:var(--ink); flex:none; }
+  .shead h1{ font-size:19px; margin:0; }
+  .shead .sub{ font-size:12px; color:var(--ink-3); }
+
+  /* flashcard */
+  .flash{ perspective:1200px; margin:8px 0 16px; }
+  .flash .inner{ position:relative; width:100%; min-height:230px; transition:transform .5s; transform-style:preserve-3d; }
+  .flash.flipped .inner{ transform:rotateY(180deg); }
+  .face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:var(--r);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--line); }
+  .face.back{ transform:rotateY(180deg); background:linear-gradient(180deg,#1c1510,#241a12); border-color:var(--gold-deep); }
+  .face .big{ font-size:34px; font-weight:800; font-family:var(--serif); }
+  .face .lbl{ font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-3); }
+  .face .hint{ font-size:13px; color:var(--ink-2); font-style:italic; }
+  .spk{ width:46px; height:46px; border-radius:50%; border:1px solid var(--gold-deep); background:#0d0a08;
+    color:var(--gold); font-size:20px; cursor:pointer; display:grid; place-items:center; }
+  .countpill{ text-align:center; font-size:13px; color:var(--ink-3); margin-bottom:6px; }
+
+  /* quiz */
+  .qword{ text-align:center; margin:6px 0 4px; }
+  .qword .big{ font-size:30px; font-weight:800; font-family:var(--serif); }
+  .qword .lbl{ font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-3); }
+  .opts{ display:grid; gap:10px; margin-top:14px; }
+  .opt{ text-align:left; padding:14px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2);
+    color:var(--ink); font:inherit; font-weight:600; cursor:pointer; transition:.15s; }
+  .opt:hover{ border-color:var(--gold-deep); }
+  .opt.correct{ background:rgba(79,180,119,.18); border-color:var(--green); }
+  .opt.wrong{ background:rgba(230,57,70,.16); border-color:var(--red); }
+  .opt:disabled{ cursor:default; }
+  input.type{ width:100%; padding:14px; border-radius:12px; border:1px solid var(--line); background:#0d0a08;
+    color:var(--ink); font:inherit; font-size:16px; text-align:center; }
+  input.type:focus{ outline:none; border-color:var(--gold); }
+
+  /* tutor chat */
+  .chat{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .msg{ padding:11px 14px; border-radius:14px; max-width:85%; font-size:14px; white-space:pre-wrap; }
+  .msg.you{ align-self:flex-end; background:linear-gradient(180deg,var(--red),var(--red-2)); color:#fff; border-bottom-right-radius:4px; }
+  .msg.bot{ align-self:flex-start; background:var(--panel-2); border:1px solid var(--line); border-bottom-left-radius:4px; }
+  .chatbar{ display:flex; gap:8px; }
+  .chatbar input{ flex:1; padding:13px; border-radius:12px; border:1px solid var(--line); background:#0d0a08; color:var(--ink); font:inherit; }
+  .chatbar input:focus{ outline:none; border-color:var(--gold); }
+
+  /* bottom nav */
+  .nav{ position:fixed; left:0; right:0; bottom:0; z-index:20;
+    background:linear-gradient(180deg,rgba(14,11,10,.4),var(--bg-2)); backdrop-filter:blur(12px);
+    border-top:1px solid var(--line); padding:8px 0 calc(8px + env(safe-area-inset-bottom)); }
+  .nav .inner{ max-width:var(--maxw); margin:0 auto; display:flex; }
+  .nav button{ flex:1; background:none; border:none; color:var(--ink-3); font:inherit; font-size:11px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:4px; }
+  .nav button .ic{ font-size:20px; }
+  .nav button.on{ color:var(--gold); }
+
+  .toast{ position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+    background:var(--panel); border:1px solid var(--gold-deep); color:var(--ink); padding:10px 18px; border-radius:999px;
+    font-weight:700; font-size:14px; z-index:40; opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+
+  .center{ text-align:center; }
+  .done{ font-size:52px; }
+  .hidden{ display:none !important; }
+  .chip{ display:inline-block; font-size:11px; padding:3px 9px; border-radius:999px; background:#0d0a08;
+    border:1px solid var(--line); color:var(--ink-2); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="flag">🇪🇸</span>
+      <b>Aprende</b>
+      <small>Learn Spanish</small>
+    </div>
+    <div class="streak">🔥 <span class="n" id="streakN">0</span> day</div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<nav class="nav">
+  <div class="inner" id="nav">
+    <button data-go="home" class="on"><span class="ic">🏠</span>Home</button>
+    <button data-go="lessons"><span class="ic">📚</span>Lessons</button>
+    <button data-go="review"><span class="ic">🔁</span>Review</button>
+    <button data-go="tutor"><span class="ic">💬</span>Tutor</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
