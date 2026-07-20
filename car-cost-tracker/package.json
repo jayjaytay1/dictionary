@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "tsx --test tests/expenses.test.ts",
+    "test:db": "bash tests/run_db_test.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -21,6 +23,7 @@
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }

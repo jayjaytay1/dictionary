@@ -77,6 +77,17 @@ Open <http://localhost:3000>.
 6. In Supabase → **Authentication → URL Configuration**, add your Vercel URL
    to the **Site URL** / redirect allow-list so email links resolve correctly.
 
+## Tests
+
+```bash
+npm test        # logic: totals, month grouping, category breakdown
+npm run test:db # applies schema.sql to Postgres and proves RLS user-isolation
+```
+
+The DB test simulates two Supabase users and verifies that Row Level Security
+keeps one user's cars/expenses fully invisible to another, plus that totals and
+the breakdown are correct. See [`tests/README.md`](./tests/README.md).
+
 ## Project structure
 
 ```

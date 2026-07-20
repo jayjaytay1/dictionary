@@ -3,30 +3,9 @@
 import { useTransition } from "react";
 import type { Expense } from "@/lib/types";
 import { CATEGORY_COLORS, CATEGORY_LABELS } from "@/lib/types";
+import { groupByMonth } from "@/lib/expenses";
 import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
 import { deleteExpense } from "@/app/actions";
-
-interface MonthGroup {
-  key: string;
-  total: number;
-  items: Expense[];
-}
-
-function groupByMonth(expenses: Expense[]): MonthGroup[] {
-  const groups = new Map<string, MonthGroup>();
-  for (const e of expenses) {
-    const key = e.date.slice(0, 7); // YYYY-MM
-    let group = groups.get(key);
-    if (!group) {
-      group = { key, total: 0, items: [] };
-      groups.set(key, group);
-    }
-    group.items.push(e);
-    group.total += e.amount;
-  }
-  // Expenses arrive already sorted date-desc, so insertion order is correct.
-  return Array.from(groups.values());
-}
 
 function ExpenseRow({ expense }: { expense: Expense }) {
   const [isPending, startTransition] = useTransition();

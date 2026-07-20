@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Car, Expense, ExpenseCategory } from "@/lib/types";
+import type { Car, Expense } from "@/lib/types";
+import {
+  allTimeTotal,
+  categoryTotals,
+  monthKey,
+  monthTotal,
+} from "@/lib/expenses";
 import { signOut } from "@/app/actions";
 import AddExpense from "@/components/AddExpense";
 import SummaryCards from "@/components/SummaryCards";
@@ -8,10 +14,6 @@ import CategoryBreakdown from "@/components/CategoryBreakdown";
 import ExpenseList from "@/components/ExpenseList";
 
 export const dynamic = "force-dynamic";
-
-function monthKey(iso: string): string {
-  return iso.slice(0, 7); // "YYYY-MM"
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -41,19 +43,10 @@ export default async function DashboardPage() {
     amount: Number(e.amount),
   }));
 
-  // ----- Totals -----
-  const allTime = expenses.reduce((sum, e) => sum + e.amount, 0);
-
-  const thisMonthKey = monthKey(new Date().toISOString());
-  const thisMonth = expenses
-    .filter((e) => monthKey(e.date) === thisMonthKey)
-    .reduce((sum, e) => sum + e.amount, 0);
-
-  // ----- Category breakdown -----
-  const byCategory = new Map<ExpenseCategory, number>();
-  for (const e of expenses) {
-    byCategory.set(e.category, (byCategory.get(e.category) ?? 0) + e.amount);
-  }
+  // ----- Totals & breakdown (see src/lib/expenses.ts for the tested logic) -----
+  const allTime = allTimeTotal(expenses);
+  const thisMonth = monthTotal(expenses, monthKey(new Date().toISOString()));
+  const byCategory = categoryTotals(expenses);
 
   const carName =
     car.nickname?.trim() ||
