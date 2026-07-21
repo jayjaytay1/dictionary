@@ -1,9 +1,9 @@
 import { forwardRef } from "react";
 
 const inputBase =
-  "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 " +
-  "placeholder:text-slate-400 shadow-sm transition " +
-  "focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3 text-fg " +
+  "placeholder:text-faint transition outline-none " +
+  "focus:border-accent/60 focus:bg-white/[0.05] focus:ring-2 focus:ring-accent/25";
 
 export const Input = forwardRef<
   HTMLInputElement,
@@ -33,7 +33,7 @@ export function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1.5 block text-sm font-medium text-slate-700"
+      className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted"
     >
       {children}
     </label>
@@ -49,11 +49,13 @@ export function Button({
 }) {
   const styles =
     variant === "primary"
-      ? "bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-60"
-      : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50";
+      ? "bg-gradient-to-b from-accent-bright to-accent text-[#04120c] font-semibold " +
+        "shadow-[0_8px_24px_-8px_rgba(16,185,129,0.6)] hover:brightness-110 " +
+        "active:brightness-95 disabled:opacity-50"
+      : "bg-white/[0.04] text-fg border border-white/10 hover:bg-white/[0.08]";
   return (
     <button
-      className={`inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed ${styles} ${className}`}
+      className={`inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm transition disabled:cursor-not-allowed ${styles} ${className}`}
       {...props}
     />
   );
@@ -62,7 +64,7 @@ export function Button({
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+    <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
       {message}
     </p>
   );
@@ -71,7 +73,7 @@ export function FormError({ message }: { message?: string | null }) {
 export function FormSuccess({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+    <p className="rounded-lg border border-accent/20 bg-accent/10 px-3 py-2 text-sm text-accent-bright">
       {message}
     </p>
   );

@@ -19,33 +19,32 @@ function ExpenseRow({ expense }: { expense: Expense }) {
 
   return (
     <li
-      className={`flex items-center gap-3 py-3 ${
-        isPending ? "opacity-50" : ""
+      className={`group flex items-center gap-3 py-3 transition ${
+        isPending ? "opacity-40" : ""
       }`}
     >
       <span
-        className="h-8 w-8 shrink-0 rounded-full"
-        style={{ backgroundColor: `${CATEGORY_COLORS[expense.category]}22` }}
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold ring-1"
+        style={{
+          backgroundColor: `${CATEGORY_COLORS[expense.category]}1f`,
+          color: CATEGORY_COLORS[expense.category],
+          boxShadow: `inset 0 0 0 1px ${CATEGORY_COLORS[expense.category]}33`,
+        }}
         aria-hidden
       >
-        <span
-          className="flex h-full w-full items-center justify-center text-xs font-bold"
-          style={{ color: CATEGORY_COLORS[expense.category] }}
-        >
-          {CATEGORY_LABELS[expense.category].charAt(0)}
-        </span>
+        {CATEGORY_LABELS[expense.category].charAt(0)}
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-900">
+        <p className="truncate text-sm font-medium text-fg">
           {expense.description || CATEGORY_LABELS[expense.category]}
         </p>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-faint">
           {CATEGORY_LABELS[expense.category]} · {formatDate(expense.date)}
         </p>
       </div>
 
-      <span className="shrink-0 text-sm font-semibold text-slate-900">
+      <span className="shrink-0 text-sm font-semibold text-fg tabular-nums">
         {formatCurrency(expense.amount)}
       </span>
 
@@ -54,7 +53,7 @@ function ExpenseRow({ expense }: { expense: Expense }) {
         onClick={handleDelete}
         disabled={isPending}
         aria-label="Delete expense"
-        className="shrink-0 rounded-md p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed"
+        className="shrink-0 rounded-md p-1.5 text-faint transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed sm:opacity-0 sm:group-hover:opacity-100"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -78,14 +77,12 @@ export default function ExpenseList({ expenses }: { expenses: Expense[] }) {
 
   if (expenses.length === 0) {
     return (
-      <section className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+      <section className="rounded-2xl border border-dashed border-white/10 bg-surface/40 p-8 text-center">
         <p className="text-3xl" aria-hidden>
           📋
         </p>
-        <h2 className="mt-3 text-sm font-semibold text-slate-900">
-          No expenses yet
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="mt-3 text-sm font-semibold text-fg">No expenses yet</h2>
+        <p className="mt-1 text-sm text-faint">
           Add your first expense above to start tracking your car&apos;s costs.
         </p>
       </section>
@@ -93,23 +90,23 @@ export default function ExpenseList({ expenses }: { expenses: Expense[] }) {
   }
 
   return (
-    <section className="space-y-5">
-      <h2 className="text-sm font-semibold text-slate-900">Recent expenses</h2>
+    <section className="space-y-4">
+      <h2 className="px-1 text-sm font-semibold text-fg">Recent expenses</h2>
 
       {groups.map((group) => (
         <div
           key={group.key}
-          className="rounded-2xl border border-slate-200 bg-white px-5 shadow-sm"
+          className="rounded-2xl border border-white/[0.08] bg-surface/70 px-5 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="flex items-center justify-between border-b border-white/[0.06] py-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-faint">
               {formatMonthLabel(group.key)}
             </h3>
-            <span className="text-xs font-semibold text-slate-500">
+            <span className="text-xs font-semibold text-muted tabular-nums">
               {formatCurrency(group.total)}
             </span>
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-white/[0.05]">
             {group.items.map((expense) => (
               <ExpenseRow key={expense.id} expense={expense} />
             ))}

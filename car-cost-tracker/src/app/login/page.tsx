@@ -45,7 +45,7 @@ export default function LoginPage() {
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="font-semibold text-brand-600 hover:text-brand-700"
+            className="font-semibold text-accent-bright hover:text-accent-2"
           >
             Sign up
           </Link>
@@ -70,7 +70,7 @@ export default function LoginPage() {
             <Label htmlFor="password">Password</Label>
             <Link
               href="/forgot-password"
-              className="mb-1.5 text-xs font-medium text-brand-600 hover:text-brand-700"
+              className="mb-1.5 text-xs font-medium text-accent-bright hover:text-accent-2"
             >
               Forgot?
             </Link>
