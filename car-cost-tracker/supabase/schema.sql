@@ -123,3 +123,54 @@ create policy "expenses_delete_own" on public.expenses
       where c.id = expenses.car_id and c.user_id = auth.uid()
     )
   );
+
+-- ---------------------------------------------------------------------------
+-- Billing: profiles (one per user) — 3-day free trial, then a $5/mo sub.
+-- Billing state is written ONLY by trusted server code (Stripe webhook via
+-- the service role). Users can read their own row but cannot modify it, so a
+-- user can't extend their own trial or mark themselves subscribed.
+-- ---------------------------------------------------------------------------
+create table if not exists public.profiles (
+  user_id                uuid primary key references auth.users (id) on delete cascade,
+  trial_ends_at          timestamptz not null default (now() + interval '3 days'),
+  stripe_customer_id     text,
+  stripe_subscription_id text,
+  subscription_status    text,
+  current_period_end     timestamptz,
+  updated_at             timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+-- Read-only for the owner; no insert/update/delete policies (service role only).
+drop policy if exists "profiles_select_own" on public.profiles;
+create policy "profiles_select_own" on public.profiles
+  for select using (auth.uid() = user_id);
+
+grant select on public.profiles to authenticated;
+
+-- Auto-create a profile (starting the 3-day trial) for every new signup.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (user_id, trial_ends_at)
+  values (new.id, now() + interval '3 days')
+  on conflict (user_id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- Backfill profiles for users who signed up before billing existed
+-- (their trial is measured from when they originally signed up).
+insert into public.profiles (user_id, trial_ends_at)
+select id, created_at + interval '3 days' from auth.users
+on conflict (user_id) do nothing;

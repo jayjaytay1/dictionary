@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import CarForm from "@/components/CarForm";
 import Logo from "@/components/Logo";
+import { getProfile, computeAccess } from "@/lib/subscription";
+import { billingEnabled } from "@/lib/stripe";
 
 export default async function OnboardingPage() {
   const supabase = await createClient();
@@ -10,11 +12,18 @@ export default async function OnboardingPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const access = computeAccess({
+    profile: await getProfile(supabase, user.id),
+    billingEnabled: billingEnabled(),
+  });
+  if (!access.hasAccess) redirect("/upgrade");
+
   // If they already have a car, skip onboarding.
   const { data: car } = await supabase
     .from("cars")
     .select("id")
     .eq("user_id", user.id)
+    .limit(1)
     .maybeSingle();
   if (car) redirect("/dashboard");
 

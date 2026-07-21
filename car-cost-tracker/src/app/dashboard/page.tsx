@@ -14,7 +14,10 @@ import CategoryBreakdown from "@/components/CategoryBreakdown";
 import ExpenseList from "@/components/ExpenseList";
 import CarSwitcher from "@/components/CarSwitcher";
 import CarsOverview, { type CarOverviewItem } from "@/components/CarsOverview";
+import TrialBanner from "@/components/TrialBanner";
 import Logo from "@/components/Logo";
+import { getProfile, computeAccess } from "@/lib/subscription";
+import { billingEnabled } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +31,14 @@ export default async function DashboardPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // Paywall: enforce access (3-day trial → subscription). No-ops until Stripe
+  // is configured, and fails open if the profiles table isn't set up yet.
+  const access = computeAccess({
+    profile: await getProfile(supabase, user.id),
+    billingEnabled: billingEnabled(),
+  });
+  if (!access.hasAccess) redirect("/upgrade");
 
   const { data: carsData } = await supabase
     .from("cars")
@@ -118,6 +129,10 @@ export default async function DashboardPage({
       </header>
 
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-6">
+        {access.billingEnabled && !access.isSubscribed && access.trialActive ? (
+          <TrialBanner daysLeft={access.trialDaysLeft} />
+        ) : null}
+
         <CarSwitcher cars={carTabs} selected={selected} />
 
         <SummaryCards
