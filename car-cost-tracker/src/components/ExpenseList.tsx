@@ -7,7 +7,13 @@ import { groupByMonth } from "@/lib/expenses";
 import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
 import { deleteExpense } from "@/app/actions";
 
-function ExpenseRow({ expense }: { expense: Expense }) {
+function ExpenseRow({
+  expense,
+  carName,
+}: {
+  expense: Expense;
+  carName?: string;
+}) {
   const [isPending, startTransition] = useTransition();
   const label = expenseCategoryLabel(expense);
 
@@ -40,8 +46,18 @@ function ExpenseRow({ expense }: { expense: Expense }) {
         <p className="truncate text-sm font-medium text-fg">
           {expense.description || label}
         </p>
-        <p className="text-xs text-faint">
-          {label} · {formatDate(expense.date)}
+        <p className="flex items-center gap-1.5 text-xs text-faint">
+          {carName ? (
+            <>
+              <span className="max-w-[7rem] truncate rounded bg-white/[0.06] px-1.5 py-0.5 text-[0.7rem] font-medium text-muted">
+                {carName}
+              </span>
+              <span>·</span>
+            </>
+          ) : null}
+          <span className="truncate">
+            {label} · {formatDate(expense.date)}
+          </span>
         </p>
       </div>
 
@@ -73,7 +89,14 @@ function ExpenseRow({ expense }: { expense: Expense }) {
   );
 }
 
-export default function ExpenseList({ expenses }: { expenses: Expense[] }) {
+export default function ExpenseList({
+  expenses,
+  carNames,
+}: {
+  expenses: Expense[];
+  /** When provided, each row shows its car's name (used in the all-cars view). */
+  carNames?: Record<string, string>;
+}) {
   const groups = groupByMonth(expenses);
 
   if (expenses.length === 0) {
@@ -109,7 +132,11 @@ export default function ExpenseList({ expenses }: { expenses: Expense[] }) {
           </div>
           <ul className="divide-y divide-white/[0.05]">
             {group.items.map((expense) => (
-              <ExpenseRow key={expense.id} expense={expense} />
+              <ExpenseRow
+                key={expense.id}
+                expense={expense}
+                carName={carNames?.[expense.car_id]}
+              />
             ))}
           </ul>
         </div>

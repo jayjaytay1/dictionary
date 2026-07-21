@@ -38,6 +38,16 @@ export interface Car {
   created_at: string;
 }
 
+/** Display name for a car — its nickname, else "Year Make Model". */
+export function carName(car: Pick<Car, "nickname" | "year" | "make" | "model">): string {
+  return car.nickname?.trim() || `${car.year} ${car.make} ${car.model}`;
+}
+
+/** Short subtitle — the full spec, useful under a nickname. */
+export function carSpec(car: Pick<Car, "year" | "make" | "model">): string {
+  return `${car.year} ${car.make} ${car.model}`;
+}
+
 export interface Expense {
   id: string;
   car_id: string;
