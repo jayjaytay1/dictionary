@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 /**
  * Centered card layout shared by all auth screens (login, signup, forgot).
@@ -21,9 +22,7 @@ export default function AuthCard({
           href="/"
           className="mb-8 flex items-center justify-center gap-2.5 text-fg"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-accent-bright to-accent-2 text-lg shadow-[0_6px_20px_-6px_rgba(16,185,129,0.7)]">
-            🚗
-          </span>
+          <Logo size={36} />
           <span className="text-lg font-semibold tracking-tight">
             Car Cost Tracker
           </span>

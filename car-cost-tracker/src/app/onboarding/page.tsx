@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import CarForm from "@/components/CarForm";
+import Logo from "@/components/Logo";
 
 export default async function OnboardingPage() {
   const supabase = await createClient();
@@ -20,9 +21,7 @@ export default async function OnboardingPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
       <div className="mb-8 animate-rise">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-accent-bright to-accent-2 text-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.7)]">
-          🚗
-        </span>
+        <Logo size={48} rounded="rounded-2xl" />
         <p className="mt-5 text-xs font-medium uppercase tracking-wide text-accent-bright">
           Step 1 of 1
         </p>

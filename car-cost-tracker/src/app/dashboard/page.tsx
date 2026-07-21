@@ -12,6 +12,7 @@ import AddExpense from "@/components/AddExpense";
 import SummaryCards from "@/components/SummaryCards";
 import CategoryBreakdown from "@/components/CategoryBreakdown";
 import ExpenseList from "@/components/ExpenseList";
+import Logo from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -57,9 +58,7 @@ export default async function DashboardPage() {
       <header className="sticky top-0 z-10 border-b border-white/[0.06] bg-bg/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3.5">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent-bright to-accent-2 text-lg shadow-[0_6px_20px_-8px_rgba(16,185,129,0.7)]">
-              🚗
-            </span>
+            <Logo size={40} />
             <div className="min-w-0">
               <p className="text-[0.65rem] font-medium uppercase tracking-wider text-faint">
                 Tracking

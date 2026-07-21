@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Logo from "@/components/Logo";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -13,9 +14,7 @@ export default async function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
       <header className="flex items-center gap-2.5">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-accent-bright to-accent-2 text-lg shadow-[0_6px_20px_-6px_rgba(16,185,129,0.7)]">
-          🚗
-        </span>
+        <Logo size={36} />
         <span className="text-lg font-semibold tracking-tight text-fg">
           Car Cost Tracker
         </span>
