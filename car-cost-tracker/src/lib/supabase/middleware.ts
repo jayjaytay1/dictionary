@@ -45,7 +45,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/reset-password") ||
     pathname.startsWith("/auth");
 
-  const isPublicRoute = pathname === "/" || isAuthRoute;
+  // `/api` includes the Stripe webhook, which is called with no user session.
+  const isPublicRoute =
+    pathname === "/" || isAuthRoute || pathname.startsWith("/api");
 
   // Not signed in and trying to reach a protected page → send to login.
   if (!user && !isPublicRoute) {
