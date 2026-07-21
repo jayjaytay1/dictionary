@@ -15,6 +15,7 @@ import ExpenseList from "@/components/ExpenseList";
 import CarSwitcher from "@/components/CarSwitcher";
 import CarsOverview, { type CarOverviewItem } from "@/components/CarsOverview";
 import TrialBanner from "@/components/TrialBanner";
+import DeleteCarButton from "@/components/DeleteCarButton";
 import Logo from "@/components/Logo";
 import { getProfile, computeAccess } from "@/lib/subscription";
 import { billingEnabled } from "@/lib/stripe";
@@ -153,6 +154,10 @@ export default async function DashboardPage({
           expenses={shown}
           carNames={isAll ? carNames : undefined}
         />
+
+        {!isAll && selectedCar ? (
+          <DeleteCarButton carId={selectedCar.id} carName={carName(selectedCar)} />
+        ) : null}
       </main>
     </div>
   );
