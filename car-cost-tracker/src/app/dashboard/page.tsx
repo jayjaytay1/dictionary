@@ -54,25 +54,30 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
-          <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Tracking
-            </p>
-            <h1 className="truncate text-lg font-semibold tracking-tight text-slate-900">
-              {carName}
-            </h1>
-            {car.nickname ? (
-              <p className="truncate text-xs text-slate-500">
-                {car.year} {car.make} {car.model}
+      <header className="sticky top-0 z-10 border-b border-white/[0.06] bg-bg/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3.5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent-bright to-accent-2 text-lg shadow-[0_6px_20px_-8px_rgba(16,185,129,0.7)]">
+              🚗
+            </span>
+            <div className="min-w-0">
+              <p className="text-[0.65rem] font-medium uppercase tracking-wider text-faint">
+                Tracking
               </p>
-            ) : null}
+              <h1 className="truncate text-base font-semibold tracking-tight text-fg">
+                {carName}
+              </h1>
+              {car.nickname ? (
+                <p className="truncate text-xs text-faint">
+                  {car.year} {car.make} {car.model}
+                </p>
+              ) : null}
+            </div>
           </div>
           <form action={signOut}>
             <button
               type="submit"
-              className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              className="shrink-0 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-white/[0.08] hover:text-fg"
             >
               Sign out
             </button>
@@ -80,7 +85,7 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      <main className="mx-auto max-w-2xl space-y-5 px-4 py-6">
         <SummaryCards allTime={allTime} thisMonth={thisMonth} />
 
         <AddExpense />

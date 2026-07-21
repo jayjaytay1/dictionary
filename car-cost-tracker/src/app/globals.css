@@ -1,19 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eef6ff;
-  --color-brand-100: #d9eaff;
-  --color-brand-500: #2563eb;
-  --color-brand-600: #1d4ed8;
-  --color-brand-700: #1e40af;
+  /* Surfaces */
+  --color-bg: #08090d;
+  --color-surface: #111319;
+  --color-surface-2: #171a22;
+  --color-elevated: #1c2029;
+
+  /* Text */
+  --color-fg: #f4f6fa;
+  --color-muted: #9aa3b2;
+  --color-faint: #6a7385;
+
+  /* Accent — emerald → teal */
   --color-accent: #10b981;
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --color-accent-bright: #34d399;
+  --color-accent-2: #2dd4bf;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
 }
 
 :root {
-  --background: #f7f8fa;
-  --foreground: #0f172a;
+  --background: #08090d;
+  --foreground: #f4f6fa;
+  color-scheme: dark;
 }
 
 html {
@@ -21,16 +32,62 @@ html {
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Deep, subtly-lit backdrop */
+  background-color: #08090d;
+  background-image:
+    radial-gradient(
+      70rem 40rem at 50% -10rem,
+      rgba(16, 185, 129, 0.14),
+      transparent 60%
+    ),
+    radial-gradient(
+      50rem 30rem at 100% 0,
+      rgba(45, 212, 191, 0.08),
+      transparent 55%
+    );
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-/* Consistent, tappable form controls on mobile. */
+/* 16px controls prevent iOS zoom-on-focus */
 input,
 select,
 button,
 textarea {
-  font-size: 16px; /* prevents iOS zoom on focus */
+  font-size: 16px;
+}
+
+/* Nicer native date/select controls on dark */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+select option {
+  background: #171a22;
+  color: #f4f6fa;
+}
+
+::selection {
+  background: rgba(52, 211, 153, 0.3);
+}
+
+/* Fade/slide-in used across cards */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

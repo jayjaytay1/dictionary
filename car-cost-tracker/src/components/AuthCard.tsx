@@ -16,12 +16,12 @@ export default function AuthCard({
 }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm animate-rise">
         <Link
           href="/"
-          className="mb-8 flex items-center justify-center gap-2 text-slate-900"
+          className="mb-8 flex items-center justify-center gap-2.5 text-fg"
         >
-          <span className="text-2xl" aria-hidden>
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-accent-bright to-accent-2 text-lg shadow-[0_6px_20px_-6px_rgba(16,185,129,0.7)]">
             🚗
           </span>
           <span className="text-lg font-semibold tracking-tight">
@@ -29,20 +29,18 @@ export default function AuthCard({
           </span>
         </Link>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+        <div className="rounded-2xl border border-white/10 bg-surface/80 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl">
+          <h1 className="text-xl font-semibold tracking-tight text-fg">
             {title}
           </h1>
           {subtitle ? (
-            <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+            <p className="mt-1.5 text-sm text-muted">{subtitle}</p>
           ) : null}
           <div className="mt-6">{children}</div>
         </div>
 
         {footer ? (
-          <div className="mt-6 text-center text-sm text-slate-500">
-            {footer}
-          </div>
+          <div className="mt-6 text-center text-sm text-muted">{footer}</div>
         ) : null}
       </div>
     </main>

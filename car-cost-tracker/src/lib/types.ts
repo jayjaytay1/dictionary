@@ -18,14 +18,14 @@ export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   other: "Other",
 };
 
-// Accent colour per category — used for the breakdown bars and dots.
+// Accent colour per category — tuned to be vivid on the dark UI.
 export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
-  fuel: "#0ea5e9",
-  maintenance: "#8b5cf6",
-  insurance: "#10b981",
-  registration: "#f59e0b",
-  repairs: "#ef4444",
-  other: "#64748b",
+  fuel: "#38bdf8",
+  maintenance: "#a78bfa",
+  insurance: "#34d399",
+  registration: "#fbbf24",
+  repairs: "#fb7185",
+  other: "#94a3b8",
 };
 
 export interface Car {

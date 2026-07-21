@@ -33,8 +33,18 @@ export default function AddExpense() {
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-slate-900">Add an expense</h2>
+    <section className="rounded-2xl border border-white/[0.08] bg-surface/70 p-5 backdrop-blur-sm">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-fg">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="h-4 w-4 text-accent-bright"
+        >
+          <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+        </svg>
+        Add an expense
+      </h2>
 
       <form ref={formRef} action={handleSubmit} className="mt-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
