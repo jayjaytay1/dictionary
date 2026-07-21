@@ -15,6 +15,7 @@ function exp(partial: Partial<Expense> & { amount: number; date: string }): Expe
     id: Math.random().toString(36).slice(2),
     car_id: "car",
     category: "fuel",
+    custom_category: null,
     description: null,
     created_at: "",
     ...partial,

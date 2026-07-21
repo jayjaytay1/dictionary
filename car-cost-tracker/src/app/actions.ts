@@ -71,9 +71,15 @@ export async function addExpense(formData: FormData): Promise<ActionResult> {
   const amount = Number(formData.get("amount"));
   const description = String(formData.get("description") ?? "").trim();
   const date = String(formData.get("date") ?? "").trim();
+  const customCategory = String(formData.get("custom_category") ?? "")
+    .trim()
+    .slice(0, 40);
 
   if (!EXPENSE_CATEGORIES.includes(category)) {
     return { error: "Please choose a category." };
+  }
+  if (category === "other" && !customCategory) {
+    return { error: "Tell us what kind of expense this is." };
   }
   if (!Number.isFinite(amount) || amount <= 0) {
     return { error: "Enter an amount greater than 0." };
@@ -85,6 +91,7 @@ export async function addExpense(formData: FormData): Promise<ActionResult> {
   const { error } = await supabase.from("expenses").insert({
     car_id: car.id,
     category,
+    custom_category: category === "other" ? customCategory : null,
     amount,
     description: description || null,
     date,

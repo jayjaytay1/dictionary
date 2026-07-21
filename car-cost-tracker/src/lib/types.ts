@@ -42,8 +42,23 @@ export interface Expense {
   id: string;
   car_id: string;
   category: ExpenseCategory;
+  custom_category: string | null;
   amount: number;
   description: string | null;
   date: string;
   created_at: string;
+}
+
+/**
+ * Human label for an expense's category — the user's custom text when the
+ * category is "other", otherwise the fixed category label.
+ */
+export function expenseCategoryLabel(expense: {
+  category: ExpenseCategory;
+  custom_category?: string | null;
+}): string {
+  if (expense.category === "other" && expense.custom_category?.trim()) {
+    return expense.custom_category.trim();
+  }
+  return CATEGORY_LABELS[expense.category];
 }
