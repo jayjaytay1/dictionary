@@ -7,7 +7,7 @@ import { EXPENSE_CATEGORIES, type ExpenseCategory } from "@/lib/types";
 
 export type ActionResult = { error: string } | { ok: true };
 
-/** Create the user's car (Phase 1: one car per user) and go to the dashboard. */
+/** Create a car for the user and go to the dashboard. Supports multiple cars. */
 export async function addCar(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const {
@@ -28,31 +28,25 @@ export async function addCar(formData: FormData): Promise<ActionResult> {
     return { error: "Please enter a valid year." };
   }
 
-  // Guard against creating a second car for the same user in Phase 1.
-  const { data: existing } = await supabase
+  const { data: created, error } = await supabase
     .from("cars")
+    .insert({
+      user_id: user.id,
+      make,
+      model,
+      year,
+      nickname: nickname || null,
+    })
     .select("id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (existing) {
-    redirect("/dashboard");
-  }
-
-  const { error } = await supabase.from("cars").insert({
-    user_id: user.id,
-    make,
-    model,
-    year,
-    nickname: nickname || null,
-  });
+    .single();
 
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect(`/dashboard?car=${created.id}`);
 }
 
-/** Add an expense to the user's car. */
+/** Add an expense to one of the user's cars. */
 export async function addExpense(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const {
@@ -60,12 +54,15 @@ export async function addExpense(formData: FormData): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in." };
 
+  // Validate the chosen car belongs to this user (RLS also enforces it).
+  const carId = String(formData.get("car_id") ?? "").trim();
   const { data: car } = await supabase
     .from("cars")
     .select("id")
+    .eq("id", carId)
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!car) return { error: "Add a car before logging expenses." };
+  if (!car) return { error: "Choose which car this expense is for." };
 
   const category = String(formData.get("category") ?? "") as ExpenseCategory;
   const amount = Number(formData.get("amount"));
@@ -112,6 +109,25 @@ export async function deleteExpense(id: string): Promise<ActionResult> {
   if (!user) return { error: "You must be logged in." };
 
   const { error } = await supabase.from("expenses").delete().eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
+/** Delete one of the user's cars (and its expenses, via cascade). */
+export async function deleteCar(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const { error } = await supabase
+    .from("cars")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");

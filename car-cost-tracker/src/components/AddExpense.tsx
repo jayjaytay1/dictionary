@@ -15,7 +15,13 @@ function today(): string {
   return new Date(now.getTime() - tz).toISOString().slice(0, 10);
 }
 
-export default function AddExpense() {
+export default function AddExpense({
+  cars,
+  defaultCarId,
+}: {
+  cars: { id: string; name: string }[];
+  defaultCarId: string;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<ExpenseCategory>("fuel");
@@ -50,6 +56,21 @@ export default function AddExpense() {
       </h2>
 
       <form ref={formRef} action={handleSubmit} className="mt-4 space-y-4">
+        {cars.length > 1 ? (
+          <div>
+            <Label htmlFor="car_id">Car</Label>
+            <Select id="car_id" name="car_id" defaultValue={defaultCarId} required>
+              {cars.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        ) : (
+          <input type="hidden" name="car_id" value={defaultCarId} />
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="category">Category</Label>
