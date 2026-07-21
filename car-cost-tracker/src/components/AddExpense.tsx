@@ -5,6 +5,7 @@ import { addExpense } from "@/app/actions";
 import {
   CATEGORY_LABELS,
   EXPENSE_CATEGORIES,
+  type ExpenseCategory,
 } from "@/lib/types";
 import { Button, FormError, Input, Label, Select } from "@/components/ui";
 
@@ -17,6 +18,7 @@ function today(): string {
 export default function AddExpense() {
   const formRef = useRef<HTMLFormElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState<ExpenseCategory>("fuel");
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -29,6 +31,7 @@ export default function AddExpense() {
       }
       // Reset the form but keep the date field usable by resetting to today.
       formRef.current?.reset();
+      setCategory("fuel");
     });
   }
 
@@ -50,7 +53,13 @@ export default function AddExpense() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="category">Category</Label>
-            <Select id="category" name="category" defaultValue="fuel" required>
+            <Select
+              id="category"
+              name="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+              required
+            >
               {EXPENSE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {CATEGORY_LABELS[cat]}
@@ -72,6 +81,19 @@ export default function AddExpense() {
             />
           </div>
         </div>
+
+        {category === "other" ? (
+          <div>
+            <Label htmlFor="custom_category">What kind of expense?</Label>
+            <Input
+              id="custom_category"
+              name="custom_category"
+              required
+              maxLength={40}
+              placeholder="e.g. Car wash, Parking, Tolls"
+            />
+          </div>
+        ) : null}
 
         <div>
           <Label htmlFor="date">Date</Label>

@@ -41,14 +41,20 @@ create index if not exists cars_user_id_idx on public.cars (user_id);
 -- Table: expenses
 -- ---------------------------------------------------------------------------
 create table if not exists public.expenses (
-  id          uuid primary key default gen_random_uuid(),
-  car_id      uuid not null references public.cars (id) on delete cascade,
-  category    expense_category not null,
-  amount      numeric(12, 2) not null check (amount >= 0),
-  description text,
-  date        date not null,
-  created_at  timestamptz not null default now()
+  id              uuid primary key default gen_random_uuid(),
+  car_id          uuid not null references public.cars (id) on delete cascade,
+  category        expense_category not null,
+  custom_category text,
+  amount          numeric(12, 2) not null check (amount >= 0),
+  description     text,
+  date            date not null,
+  created_at      timestamptz not null default now()
 );
+
+-- Added after v1: label typed by the user when category = 'other'.
+-- Safe to run on an existing table.
+alter table public.expenses
+  add column if not exists custom_category text;
 
 create index if not exists expenses_car_id_idx on public.expenses (car_id);
 create index if not exists expenses_date_idx on public.expenses (date);

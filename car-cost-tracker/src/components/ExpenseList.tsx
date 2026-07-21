@@ -2,13 +2,14 @@
 
 import { useTransition } from "react";
 import type { Expense } from "@/lib/types";
-import { CATEGORY_COLORS, CATEGORY_LABELS } from "@/lib/types";
+import { CATEGORY_COLORS, expenseCategoryLabel } from "@/lib/types";
 import { groupByMonth } from "@/lib/expenses";
 import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
 import { deleteExpense } from "@/app/actions";
 
 function ExpenseRow({ expense }: { expense: Expense }) {
   const [isPending, startTransition] = useTransition();
+  const label = expenseCategoryLabel(expense);
 
   function handleDelete() {
     if (!confirm("Delete this expense?")) return;
@@ -32,15 +33,15 @@ function ExpenseRow({ expense }: { expense: Expense }) {
         }}
         aria-hidden
       >
-        {CATEGORY_LABELS[expense.category].charAt(0)}
+        {label.charAt(0).toUpperCase()}
       </span>
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-fg">
-          {expense.description || CATEGORY_LABELS[expense.category]}
+          {expense.description || label}
         </p>
         <p className="text-xs text-faint">
-          {CATEGORY_LABELS[expense.category]} · {formatDate(expense.date)}
+          {label} · {formatDate(expense.date)}
         </p>
       </div>
 
